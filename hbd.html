@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kue Meledak!</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: white;
+      font-family: 'Comic Sans MS', cursive;
+      overflow: hidden;
+    }
+
+    .cake-container {
+      position: relative;
+      width: 150px;
+      height: 120px;
+    }
+
+    .cake-part {
+      position: absolute;
+      background: #ff69b4;
+      width: 150px;
+      height: 30px;
+      border-radius: 10px;
+      transition: transform 0.8s ease, opacity 0.8s ease;
+    }
+
+    .cake-part.layer1 {
+      top: 0;
+    }
+
+    .cake-part.layer2 {
+      top: 30px;
+      background: white;
+    }
+
+    .cake-part.layer3 {
+      top: 60px;
+      background: #ff69b4;
+    }
+
+    .candle {
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 10px;
+      height: 30px;
+      background: #ffe066;
+      border-radius: 2px;
+      z-index: 2;
+      transition: transform 0.8s ease, opacity 0.8s ease;
+    }
+
+    .flame {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 14px;
+      background: radial-gradient(circle, #ff0, #f90, #f00);
+      border-radius: 50%;
+      animation: flicker 0.2s infinite alternate;
+      box-shadow: 0 0 20px 8px rgba(255, 200, 0, 0.6);
+    }
+
+    @keyframes flicker {
+      from { transform: translateX(-50%) scale(1); }
+      to { transform: translateX(-50%) scale(1.2); }
+    }
+
+    .btn {
+      margin-top: 30px;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      background: #ff69b4;
+      border: none;
+      border-radius: 20px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .message {
+      margin-top: 20px;
+      font-size: 2em;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    .explode .layer1 {
+      transform: translate(-100px, -80px) rotate(-40deg);
+      opacity: 0;
+    }
+
+    .explode .layer2 {
+      transform: translate(100px, -60px) rotate(50deg);
+      opacity: 0;
+    }
+
+    .explode .layer3 {
+      transform: translate(-80px, 100px) rotate(-60deg);
+      opacity: 0;
+    }
+
+    .explode .candle {
+      transform: translate(50px, -120px) rotate(180deg);
+      opacity: 0;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cake-container" id="cake">
+    <div class="cake-part layer1"></div>
+    <div class="cake-part layer2"></div>
+    <div class="cake-part layer3"></div>
+    <div class="candle">
+      <div class="flame"></div>
+    </div>
+  </div>
+
+  <button class="btn" onclick="explodeCake()">Happy Birthday! 🎁</button>
+  <canvas id="confetti"></canvas>
+  <div class="message" id="message">Selamat Ulang Tahun Sayangku <3 </div>
+
+  <script>
+    const cake = document.getElementById('cake');
+    const msg = document.getElementById('message');
+
+    function explodeCake() {
+      cake.classList.add('explode');
+      msg.style.opacity = 1;
+      startConfetti();
+    }
+
+    // Confetti
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let confetti = [];
+
+    function ConfettiParticle() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height - canvas.height;
+      this.r = Math.random() * 6 + 4;
+      this.d = Math.random() * 10 + 5;
+      this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+      this.tilt = Math.random() * 10 - 10;
+      this.tiltAngleIncremental = Math.random() * 0.07 + 0.05;
+      this.tiltAngle = 0;
+
+      this.draw = function () {
+        ctx.beginPath();
+        ctx.lineWidth = this.r / 2;
+        ctx.strokeStyle = this.color;
+        ctx.moveTo(this.x + this.tilt + this.r / 4, this.y);
+        ctx.lineTo(this.x + this.tilt, this.y + this.tilt + this.r / 4);
+        ctx.stroke();
+      };
+    }
+
+    function startConfetti() {
+      for (let i = 0; i < 150; i++) {
+        confetti.push(new ConfettiParticle());
+      }
+      renderConfetti();
+    }
+
+    function renderConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      confetti.forEach((c, i) => {
+        c.tiltAngle += c.tiltAngleIncremental;
+        c.y += (Math.cos(c.d) + 3 + c.r / 2) / 2;
+        c.x += Math.sin(c.d);
+        c.tilt = Math.sin(c.tiltAngle - i / 3) * 15;
+        c.draw();
+      });
+      requestAnimationFrame(renderConfetti);
+    }
+  </script>
+
+</body>
+</html>
